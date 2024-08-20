@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  mailserver:
+    image: mailserver/docker-mailserver:latest
+    hostname: mail
+    domainname: yoanamail.com
+    container_name: mailserver
+    environment:
+      - MAIL_USER=yourname@yoanamail.com
+      - MAIL_PASS=yourpassword
+    ports:
+      - "25:25"
+      - "143:143"
+      - "587:587"
+      - "993:993"
+    volumes:
+      - maildata:/var/mail
+      - mailstate:/var/mail-state
+      - maillogs:/var/log/mail
+      - ./config/:/tmp/docker-mailserver/
+    restart: always
+
+volumes:
+  maildata:
+  mailstate:
+  maillogs:
