@@ -1,0 +1,1 @@
+mail._domainkey.yoanamail.com yoanamail.com:mail:/etc/opendkim/keys/yoanamail.com/mail.private
