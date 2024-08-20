@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YoanaMail</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>YoanaMail</h1>
+    <div id="mailbox">
+        <h2>Inbox</h2>
+        <ul id="email-list"></ul>
+    </div>
+    <div id="compose">
+        <h2>Compose Email</h2>
+        <form id="compose-form">
+            <input type="email" id="to" placeholder="To" required>
+            <input type="text" id="subject" placeholder="Subject" required>
+            <textarea id="body" placeholder="Email body"></textarea>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
