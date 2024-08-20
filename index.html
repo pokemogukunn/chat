@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ファイル送信機能付きチャット</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        .chat-container { width: 100%; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        .messages { height: 300px; overflow-y: scroll; border-bottom: 1px solid #ccc; margin-bottom: 10px; padding: 10px; }
+        .message { margin-bottom: 10px; }
+        .message.sent { text-align: right; }
+        .read-receipt { font-size: 12px; color: gray; }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getDatabase, ref as dbRef, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        let currentUser = "user1";
+
+        function isYouTubeUrl(url) {
+            const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+            return youtubeRegex.test(url);
+        }
+
+        function extractYouTubeID(url) {
+            const idRegex = /(?:youtube\.com\/.*v=|youtu\.be\/|\/)([a-zA-Z0-9_-]{11})/;
+            const match = url.match(idRegex);
+            return match ? match[1] : null;
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById("messageInput");
+            let messageText = messageInput.value.trim();
+
+            if (messageText !== "") {
+                if (messageText.includes("if46.inetnf.net:443/inetcloud.msg/")) {
+                    alert("このURLは送信できません。");
+                    return;
+                }
+
+                if (isYouTubeUrl(messageText)) {
+                    const videoID = extractYouTubeID(messageText);
+                    const customUrl = `サイト名/watch?v=${videoID}`;
+                    messageText = `<a href="${customUrl}" target="_blank">${customUrl}</a>`;
+                }
+
+                const message = {
+                    text: messageText,
+                    sender: currentUser,
+                    read: false
+                };
+                push(dbRef(database, 'messages'), message);
+                displayMessages();
+                messageInput.value = "";
+            }
+        }
+
+        function displayMessages() {
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML = "";
+
+            onValue(dbRef(database, 'messages'), (snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    const message = childSnapshot.val();
+                    const messageElement = document.createElement("div");
+                    messageElement.classList.add("message");
+                    if (message.sender === currentUser) {
+                        messageElement.classList.add("sent");
+                    }
+
+                    messageElement.innerHTML = `
+                        <div>${message.text}</div>
+                        <div class="read-receipt">${message.read ? "既読" : ""}</div>
+                    `;
+                    messagesDiv.appendChild(messageElement);
+
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+                    if (!message.read && message.sender !== currentUser) {
+                        const messageKey = childSnapshot.key;
+                        setTimeout(() => {
+                            update(dbRef(database, 'messages/' + messageKey), { read: true });
+                            displayMessages();
+                        }, 1000);
+                    }
+                });
+            });
+        }
+
+        window.onload = displayMessages;
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <input type="text" id="messageInput" placeholder="メッセージを入力" style="width: calc(100% - 50px);">
+        <button onclick="sendMessage()">送信</button>
+    </div>
+</body>
+</html>
