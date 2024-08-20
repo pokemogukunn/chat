@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サインアップ</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; text-align: center; }
+        .container { margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>アカウント作成</h1>
+        <input type="email" id="email" placeholder="メールアドレス" /><br/><br/>
+        <input type="password" id="password" placeholder="パスワード" /><br/><br/>
+        <button onclick="signup()">サインアップ</button><br/><br/>
+        <input type="text" id="verificationCode" placeholder="認証コード" style="display:none;" /><br/><br/>
+        <button onclick="verifyCode()" style="display:none;" id="verifyButton">認証</button><br/><br/>
+        <a href="login.html">既にアカウントをお持ちですか？ ログイン</a>
+    </div>
+    <script>
+        function signup() {
+            const email = document.getElementById('email').value;
+            
+            // サインアップと同時に認証メールを送信
+            fetch('/sendVerification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                document.getElementById('verificationCode').style.display = 'block';
+                document.getElementById('verifyButton').style.display = 'block';
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function verifyCode() {
+            const email = document.getElementById('email').value;
+            const code = document.getElementById('verificationCode').value;
+
+            // 認証コードの確認
+            fetch('/verifyCode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, code })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = 'index.html'; // 認証成功時にリダイレクト
+                } else {
+                    alert('認証コードが間違っています。');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
